@@ -23,18 +23,14 @@ class Game2048Env(gym.Env):
         self.render_mode = render_mode
         self.screen = None
 
-        self.observation_space = gym.spaces.Dict(
-            {
-                "board": gym.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32),
-            }
-        )
+        self.observation_space = gym.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32)
 
         self.action_space = gym.spaces.Discrete(4)
 
         assert not self.end
 
     def _get_obs(self):
-        return {'board': self._board}
+        return self._board
 
     def _get_info(self):
         return {}
@@ -42,7 +38,7 @@ class Game2048Env(gym.Env):
     def reset(self, seed:Optional[int]=None, options:Optional[dict]=None):
         super().reset(seed=seed)
 
-        self._board = np.zeros((4, 4), dtype=np.int32)
+        self._board = np.zeros((self.size, self.size), dtype=np.int32)
         self._score = 0
         self.__end = False
 

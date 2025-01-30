@@ -1,9 +1,9 @@
 from typing import Optional
 import numpy as np
-import gymnasium as gymn
+import gymnasium as gym
 
 
-class Game2048Env(gymn.Env):
+class Game2048Env(gym.Env):
     metadata = {
         'render_modes': [
             'ansi'
@@ -23,13 +23,13 @@ class Game2048Env(gymn.Env):
         self.render_mode = render_mode
         self.screen = None
 
-        self.observation_space = gymn.spaces.Dict(
+        self.observation_space = gym.spaces.Dict(
             {
-                "board": gymn.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32),
+                "board": gym.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32),
             }
         )
 
-        self.action_space = gymn.spaces.Discrete(4)
+        self.action_space = gym.spaces.Discrete(4)
 
         assert not self.end
 

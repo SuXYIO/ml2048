@@ -1,9 +1,9 @@
 from typing import Optional
 import numpy as np
-import gymnasium as gym
+import gymnasium as gymn
 
 
-class Game2048Env(gym.Env):
+class Game2048Env(gymn.Env):
     metadata = {
         'render_modes': [
             'ansi'
@@ -23,13 +23,13 @@ class Game2048Env(gym.Env):
         self.render_mode = render_mode
         self.screen = None
 
-        self.observation_space = gym.spaces.Dict(
+        self.observation_space = gymn.spaces.Dict(
             {
-                "board": gym.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32),
+                "board": gymn.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32),
             }
         )
 
-        self.action_space = gym.spaces.Discrete(4)
+        self.action_space = gymn.spaces.Discrete(4)
 
         assert not self.end
 
@@ -42,7 +42,6 @@ class Game2048Env(gym.Env):
     def reset(self, seed:Optional[int]=None, options:Optional[dict]=None):
         super().reset(seed=seed)
 
-        self._agent_location = self.np_random.integers(0, self.size, size=2, dtype=int)
         self._board = np.zeros((4, 4), dtype=np.int32)
         self._score = 0
         self.__end = False
@@ -72,9 +71,8 @@ class Game2048Env(gym.Env):
     def _add_rand_tile(self):
         where_empty = list(zip(*np.where(self._board == 0)))
         if where_empty:
-            selected = where_empty[np.random.randint(0, len(where_empty))]
-            self._board[selected] = \
-                2 if np.random.random() < self.__rate_2 else 4
+            selected = self.np_random.choice(where_empty)
+            self._board[tuple(selected)] = self.np_random.choice([2, 4], p=[self.__rate_2, 1 - self.__rate_2])
             self.__end = False
         else:
             self.__end = True
@@ -146,8 +144,3 @@ class Game2048Env(gym.Env):
     def close(self):
         pass
 
-if __name__ == '__main__':
-    gym.register(
-        id="gymnasium_env/Game2048Env-v0",
-        entry_point=Game2048Env,
-    )

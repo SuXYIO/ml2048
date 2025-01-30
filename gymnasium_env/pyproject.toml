@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Game2048Env"
+version = "0.0.1"
+dependencies = [
+  "gymnasium",
+  "numpy",
+  "pre-commit",
+]

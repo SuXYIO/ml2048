@@ -1,0 +1,4 @@
+from Game2048Env.wrappers.clip_reward import ClipReward
+from Game2048Env.wrappers.discrete_actions import DiscreteActions
+from Game2048Env.wrappers.reacher_weighted_reward import ReacherRewardWrapper
+from Game2048Env.wrappers.relative_position import RelativePosition

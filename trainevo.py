@@ -1,3 +1,7 @@
+'''
+use evolutionary algorithm to train
+-h for help
+'''
 import argparse
 import torch
 import evotorch

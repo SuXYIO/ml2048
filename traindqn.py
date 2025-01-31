@@ -1,6 +1,8 @@
 '''
-Code modified from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+use DQN to train
+-h for help
 '''
+# Code modified from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
 import argparse
 import gymnasium as gym
 import Game2048Env
@@ -11,26 +13,49 @@ from collections import namedtuple, deque
 from itertools import count
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch import nn
+from torch import optim
 
 from network import *
 
-class ReplayMemory(object):
+env = gym.make('Game2048Env/Game2048-v0')
+
+plt.ion()
+
+device = torch.device(
+    "cuda" if torch.cuda.is_available() else
+    "cpu"
+)
+
+Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
+
+net = torch.load(args.template_path)
+policy_net = net().to(device)
+target_net = net().to(device)
+target_net.load_state_dict(policy_net.state_dict())
+
+steps_done = 0
+episode_rewards = []
+
+class ReplayMemory:
+    '''DQN replay memory'''
     def __init__(self, capacity):
         self.memory = deque([], maxlen=capacity)
 
-    def push(self, *args):
-        """Save a transition"""
-        self.memory.append(Transition(*args))
+    def push(self, *transition_args):
+        '''Save a transition'''
+        self.memory.append(Transition(*transition_args))
 
     def sample(self, batch_size):
+        '''Sample from memory'''
         return random.sample(self.memory, batch_size)
 
     def __len__(self):
+        '''Memory length'''
         return len(self.memory)
 
 def select_action(state):
+    '''select action using epsilon greedy'''
     global steps_done
     sample = random.random()
     eps_threshold = EPS_END + (EPS_START - EPS_END) * \
@@ -44,6 +69,7 @@ def select_action(state):
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
 
 def plot_result():
+    '''plot the training result'''
     plt.figure(figsize=(6, 6))
 
     # Reward
@@ -64,6 +90,7 @@ def plot_result():
     plt.show()
 
 def optimize_model():
+    '''optimize the model'''
     if len(memory) < BATCH_SIZE:
         return
     transitions = memory.sample(BATCH_SIZE)
@@ -140,38 +167,22 @@ if __name__ == '__main__':
     LR = args.lr
     REPLAY_MEMORY_SIZE = args.replay_memory_size
 
-    INTERV = 16
-
-    env = gym.make('Game2048Env/Game2048-v0')
-
-    plt.ion()
-
-    # if GPU is to be used
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else
-        "cpu"
-    )
-
-    Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
-
-    net = torch.load(args.template_path)
-    policy_net = net().to(device)
-    target_net = net().to(device)
-    target_net.load_state_dict(policy_net.state_dict())
-
     optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
     memory = ReplayMemory(REPLAY_MEMORY_SIZE)
 
-    steps_done = 0
-    episode_rewards = []
+    LOG_INTERV = 16
 
     num_episodes = args.episodes
     for i_episode in range(num_episodes):
-        state, info = env.reset()
-        state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0)  # Shape: [1, n_observations]
+        estate, info = env.reset()
+        estate = torch.tensor(
+            estate.flatten(),
+            dtype=torch.float32,
+            device=device
+        ).unsqueeze(0)
         total_reward = 0
         for t in count():
-            action = select_action(state)
+            action = select_action(estate)
             observation, reward, terminated, truncated, _ = env.step(action.item())
             total_reward += reward
             reward = torch.tensor([reward], device=device)
@@ -179,21 +190,28 @@ if __name__ == '__main__':
             if terminated:
                 next_state = None
             else:
-                next_state = torch.tensor(observation.flatten(), dtype=torch.float32, device=device).unsqueeze(0)  # Shape: [1, n_observations]
+                next_state = torch.tensor(
+                    observation.flatten(),
+                    dtype=torch.float32,
+                    device=device
+                ).unsqueeze(0)
 
-            memory.push(state, action, next_state, reward)
+            memory.push(estate, action, next_state, reward)
             state = next_state
             optimize_model()
 
             # Soft update of the target network's weights
             with torch.no_grad():
                 for key in target_net.state_dict():
-                    target_net.state_dict()[key] = target_net.state_dict()[key] * (1 - TAU) + policy_net.state_dict()[key] * TAU
+                    target_net.state_dict()[key] = \
+                        target_net.state_dict()[key] \
+                        * (1 - TAU) + policy_net.state_dict()[key] \
+                        * TAU
 
             if terminated or truncated:
                 episode_rewards.append(total_reward)
-                if i_episode % INTERV == 0 and i_episode != 0:
-                    print(f"Episode {i_episode + 1} finished after {t + 1} timesteps with total reward: {total_reward}")
+                if i_episode % LOG_INTERV == 0 and i_episode != 0:
+                    print(f"Episode {i_episode + 1} finished, total reward: {total_reward}")
                 break
 
     print('Complete')

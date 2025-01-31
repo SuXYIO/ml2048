@@ -1,19 +1,25 @@
+'''
+neural network definitions, and template export
+-h for help
+'''
 import argparse
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
-class fnn0(nn.Module):
+class Fnn0(nn.Module):
+    '''feed-forward neural network 0'''
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(16, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, 4)
 
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)
+    def forward(self, x_tensor):
+        '''forward run the network'''
+        x_tensor = F.relu(self.fc1(x_tensor))
+        x_tensor = F.relu(self.fc2(x_tensor))
+        return self.fc3(x_tensor)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Network export')
@@ -21,4 +27,10 @@ if __name__ == '__main__':
     parser.add_argument('save_path', type=str, help='network save path')
     args = parser.parse_args()
 
-    torch.save(eval(args.network_name), args.save_path)
+    cmp_name = args.network_name.lower()
+    if args.network_name == 'fnn0':
+        SaveCls = Fnn0
+    else:
+        raise ValueError(f"Network '{args.network_name}' is not defined.")
+
+    torch.save(SaveCls, args.save_path)

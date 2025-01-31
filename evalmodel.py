@@ -1,3 +1,7 @@
+'''
+evaluate trained model
+-h for help
+'''
 import argparse
 import torch
 import gymnasium as gym
@@ -9,11 +13,14 @@ device = torch.device(
 )
 
 def evaluate_model(model, num_episodes=4):
+    '''
+    evaluate average reward for a model
+    '''
     total_rewards = []
     env = gym.make('Game2048Env/Game2048-v0')
 
     for _ in range(num_episodes):
-        state, info = env.reset()
+        state, _ = env.reset()
         state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0)
         total_reward = 0
         while True:
@@ -23,10 +30,14 @@ def evaluate_model(model, num_episodes=4):
             total_reward += reward
             if terminated or truncated:
                 break
-            state = torch.tensor(observation.flatten(), dtype=torch.float32, device=device).unsqueeze(0)  # Update state
+            state = torch.tensor(
+                observation.flatten(),
+                dtype=torch.float32,
+                device=device
+            ).unsqueeze(0)
         total_rewards.append(total_reward)
-    average_reward = sum(total_rewards) / num_episodes
-    return average_reward
+    avg_reward = sum(total_rewards) / num_episodes
+    return avg_reward
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='evaluate trained model for 2048 game')

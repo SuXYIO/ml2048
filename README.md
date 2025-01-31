@@ -17,11 +17,13 @@ And a package
 
 ## Installation
 
-For the gymnasium to work, you have to run
+For the 2048 gymnasium env to work, you have to run
 
 ```bash
 pip install -e Game2048Env
 ```
+
+in this directory
 
 ## Usage
 
@@ -45,4 +47,9 @@ Well, all the files are built with `argparse`, so you can check detailed usage v
 - [ ] Find better hyperparameters
 - [ ] Remove the redundant template stuff
 - [ ] Add human render mode for env
+
+## Notes
+
+This is just a little experiment, so im only using a main branch, at least until i get this to work as a big project, which is unlikely.  
+That means this repo is really unstable, so better fork it if you wanna use it yourself.  
 

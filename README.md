@@ -4,18 +4,13 @@
 
 A ML experiment on the game 2048
 
-## Components
-
-The project consists of three main files
-- `network.py` neural network definitions, and template export
-- `traindqn.py` use DQN to train
-- `trainevo.py` use evolutionary algorithm to train
-- `evalmodel.py` evaluate trained model
-
-And a package
-- `Game2048Env` gymnasium env for game 2048
-
 ## Installation
+
+Like most python projects
+
+```bash
+pip install -r requirements.txt
+```
 
 For the 2048 gymnasium env to work, you have to run
 
@@ -38,18 +33,47 @@ python3 traindqn.py templates/fnn0.pth saves/fnn0_256e.pth 256
 python3 evalmodel.py
 ```
 
-Well, all the files are built with `argparse`, so you can check detailed usage via `python3 foo.py -h`.
+Well, all the files are built with `argparse`, so you can check **detailed usage** via `python3 foo.py -h`.
+
+## Components
+
+The project consists of three main files
+
+| file | desc |
+| ---- | ---- |
+| `network.py` | neural network **definitions**, and template **export** |
+| `traindqn.py` | use DQN to **train** |
+| `trainevo.py` | use evolutionary algorithm to **train** |
+| `evalmodel.py` | **evaluate** trained model |
+
+And a package
+
+| package | desc |
+| ------- | ---- |
+| `Game2048Env` | gymnasium env for game 2048 |
+
+## Dependencies
+
+| name | note |
+| ---- | ---- |
+| `torch` | / |
+| `matplotlib` | / |
+| `numpy` | / |
+| `gymnasium` | / |
+| `evotorch` | only necessary for `trainevo.py` |
 
 ## Todo
 
-- [ ] Add more arguments for `trainevo.py`
-- [ ] Add dynamic plots for training
-- [ ] Find better hyperparameters
-- [ ] Remove the redundant template stuff
-- [ ] Add human render mode for env
+- [ ] Add more **arguments** for `trainevo.py`
+- [ ] Add **dynamic plots** for training
+- [ ] Find better **hyperparameters**
+- [ ] Remove the redundant **template** stuff
+- [ ] Add **human render** mode for env
+
+Open and **glad** for *PR*s.  
 
 ## Notes
 
-This is just a little experiment, so im only using a main branch, at least until i get this to work as a big project, which is unlikely.  
-That means this repo is really unstable, so better fork it if you wanna use it yourself.  
+This is just a little experiment, so im only using a `main` branch, at least until i get this to work as a big project, which is unlikely.  
+That means this repo is **really unstable**, so better *fork* it if you wanna use it yourself.  
 

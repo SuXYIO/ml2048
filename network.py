@@ -4,16 +4,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class fnn0(nn.Module):
-    def __init__(self, n_observations, n_actions):
+    def __init__(self):
         super().__init__()
-        self.layer1 = nn.Linear(n_observations, 128)
-        self.layer2 = nn.Linear(128, 64)
-        self.layer3 = nn.Linear(64, n_actions)
+        self.fc1 = nn.Linear(16, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 4)
 
     def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.layer2(x))
-        return self.layer3(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return self.fc3(x)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Network export')

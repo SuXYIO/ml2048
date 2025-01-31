@@ -44,42 +44,23 @@ def select_action(state):
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
 
 def plot_result():
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 6))
-
-    # Duration
-    durations_t = torch.tensor(episode_durations, dtype=torch.float)
-    ax1.set_title(f'{args.save_path}, {num_episodes} episodes')
-    ax1.set_xlabel('Episode')
-    ax1.set_ylabel('Duration')
-    ax1.plot(durations_t.numpy(), label='Episode Duration', color='blue')
-    
-    # Take 100 episode averages and plot them too
-    if len(durations_t) >= 100:
-        means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
-        means = torch.cat((torch.zeros(99), means))
-        ax1.plot(means.numpy(), label='100 Episode Average', color='orange')
-
-    ax1.legend()
-    ax1.grid()
+    plt.figure(figsize=(6, 6))
 
     # Reward
     rewards_t = torch.tensor(episode_rewards, dtype=torch.float)
-    ax2.set_title(f'{args.save_path}, {num_episodes} episodes')
-    ax2.set_xlabel('Episode')
-    ax2.set_ylabel('Reward')
-    ax2.plot(rewards_t.numpy(), label='Total Reward', color='green')
-    
+    plt.title(f'{args.save_path}, {num_episodes} episodes')
+    plt.xlabel('episode')
+    plt.ylabel('reward')
+    plt.plot(rewards_t.numpy(), label='Total Reward', color='blue')
+
     # Take 100 episode averages and plot them too
     if len(rewards_t) >= 100:
         means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
         means = torch.cat((torch.zeros(99), means))
-        ax2.plot(means.numpy(), label='100 Episode Average', color='red')
+        plt.plot(means.numpy(), label='100 Episode Average', color='red')
 
-    ax2.legend()
-    ax2.grid()
-
-    # Adjust layout
-    plt.tight_layout()
+    plt.legend()
+    plt.grid()
     plt.show()
 
 def optimize_model():
@@ -159,6 +140,8 @@ if __name__ == '__main__':
     LR = args.lr
     REPLAY_MEMORY_SIZE = args.replay_memory_size
 
+    INTERV = 16
+
     env = gym.make('Game2048Env/Game2048-v0')
 
     plt.ion()
@@ -171,24 +154,16 @@ if __name__ == '__main__':
 
     Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
-    # Get number of actions from gym action space
-    n_actions = env.action_space.n
-    # Get the number of state observations
-    state, info = env.reset()
-    n_observations = state.flatten().shape[0]
-
     net = torch.load(args.template_path)
-    policy_net = net(n_observations, n_actions).to(device)
-    target_net = net(n_observations, n_actions).to(device)
+    policy_net = net().to(device)
+    target_net = net().to(device)
     target_net.load_state_dict(policy_net.state_dict())
 
     optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
     memory = ReplayMemory(REPLAY_MEMORY_SIZE)
 
     steps_done = 0
-    episode_durations = []
     episode_rewards = []
-
 
     num_episodes = args.episodes
     for i_episode in range(num_episodes):
@@ -207,9 +182,7 @@ if __name__ == '__main__':
                 next_state = torch.tensor(observation.flatten(), dtype=torch.float32, device=device).unsqueeze(0)  # Shape: [1, n_observations]
 
             memory.push(state, action, next_state, reward)
-
             state = next_state
-
             optimize_model()
 
             # Soft update of the target network's weights
@@ -218,9 +191,9 @@ if __name__ == '__main__':
                     target_net.state_dict()[key] = target_net.state_dict()[key] * (1 - TAU) + policy_net.state_dict()[key] * TAU
 
             if terminated or truncated:
-                episode_durations.append(t + 1)
                 episode_rewards.append(total_reward)
-                print(f"Episode {i_episode + 1} finished after {t + 1} timesteps with total reward: {total_reward}")
+                if i_episode % INTERV == 0 and i_episode != 0:
+                    print(f"Episode {i_episode + 1} finished after {t + 1} timesteps with total reward: {total_reward}")
                 break
 
     print('Complete')

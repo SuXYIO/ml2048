@@ -37,6 +37,8 @@ if __name__ == '__main__':
     plt.title(f'{args.save_path}, {args.episodes} episodes')
     plt.xlabel('episode')
     plt.ylabel('reward')
+    plt.legend()
+    plt.grid()
     plt.show()
 
     trained_network = problem.parameterize_net(searcher.status["center"])

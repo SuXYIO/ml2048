@@ -31,7 +31,7 @@ def evaluate_model(model, num_episodes=4):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='evaluate trained model for 2048 game')
     parser.add_argument('path', type=str, help='path to trained model')
-    parser.add_argument('episodes', type=int, help='number of episodes to eval')
+    parser.add_argument('-e', '--episodes', type=int, default=64, help='number of episodes to eval')
     args = parser.parse_args()
 
     policy_net = torch.load(args.path)

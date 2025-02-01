@@ -180,15 +180,21 @@ class Game2048Env(gym.Env):
         # Render numbers in the grid
         cell_size = self.window_size / self.size
         font = pygame.font.Font(None, 48)
-        text_color = (0, 0, 0)
         for row in range(self.size):
             for col in range(self.size):
+                number = self._board[row][col]
                 x = col * cell_size + cell_size // 2
                 y = row * cell_size + cell_size // 2
 
-                # Render the text surface
-                text_surface = font.render(str(self._board[row][col]), True, text_color)
-                text_rect = text_surface.get_rect(center=(x, y))  # Center the text
+                # text
+                text_color = (0, 0, 0) if number != 0 else (255, 255, 255)
+                text_surface = font.render(str(number), True, text_color)
+                text_rect = text_surface.get_rect(center=(x, y))
+
+                # tile
+                tile_color = self._get_color(number)
+                pygame.draw.rect(canvas, tile_color, (col * cell_size, row * cell_size, cell_size, cell_size))
+
                 canvas.blit(text_surface, text_rect)
 
         # Blit the canvas to the window
@@ -205,6 +211,24 @@ class Game2048Env(gym.Env):
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
 
-    def close(self):
-        pass
+    def _get_color(self, number:int):
+        tile_colors = {
+            0: "#CDC1B4",
+            2: "#EEE4DA",
+            4: "#EDE0C8",
+            8: "#F2B179",
+            16: "#F59563",
+            32: "#F67C5F",
+            64: "#F67C5F",
+            128: "#EDCF72",
+            256: "#EDCC61",
+            512: "#EDC850",
+            1024: "#EDC53F",
+            2048: "#EDC22E"
+        }
+        return tile_colors.get(number, "#EDC22E")
 
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()

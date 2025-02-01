@@ -71,7 +71,6 @@ And a package
 - [ ] Add **dynamic plots** for training
 - [ ] Find better **hyperparameters**
 - [ ] Remove the redundant **template** stuff
-- [ ] Add **human render** mode for env
 
 Open and **glad** for *PR*s.  
 

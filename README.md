@@ -22,7 +22,7 @@ in this directory
 
 ## Usage
 
-So, training a network might look like this
+So, simple usage might look like this
 
 ```bash
 # Export the template
@@ -31,6 +31,8 @@ python3 network.py fnn0 templates/fnn0.pth
 python3 traindqn.py templates/fnn0.pth saves/fnn0_256e.pth 256
 # Evaluate the model score
 python3 evalmodel.py
+# See the network run by yourself
+python3 demo.py saves/fnn0_256e.pth
 ```
 
 Well, all the files are built with `argparse`, so you can check **detailed usage** via `python3 foo.py -h`.
@@ -45,6 +47,7 @@ The project consists of three main files
 | `traindqn.py` | use DQN to **train** |
 | `trainevo.py` | use evolutionary algorithm to **train** |
 | `evalmodel.py` | **evaluate** trained model |
+| `demo.py` | **see** the trained model work |
 
 And a package
 
@@ -64,7 +67,7 @@ And a package
 
 ## Todo
 
-- [ ] Add more **arguments** for `trainevo.py`
+- [ ] Add more **arguments**
 - [ ] Add **dynamic plots** for training
 - [ ] Find better **hyperparameters**
 - [ ] Remove the redundant **template** stuff

@@ -42,3 +42,5 @@ if __name__ == '__main__':
             dtype=torch.float32,
             device=device
         ).unsqueeze(0)
+        if args.render_mode == 'ansi':
+            print(env.render())

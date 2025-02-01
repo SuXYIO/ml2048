@@ -67,7 +67,7 @@ class Game2048Env(gym.Env):
         1: lose
         2: win
         '''
-        if self._score >= self._max_score:
+        if np.max(self._board) >= self._max_score:
             return 2
         elif self.__end:
             return 1

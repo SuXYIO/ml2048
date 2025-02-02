@@ -16,6 +16,11 @@ if __name__ == '__main__':
     parser.add_argument('template_path', type=str, help='path to network template')
     parser.add_argument('save_path', type=str, help='path to save the trained network')
     parser.add_argument('episodes', type=int, help='episodes to train the network')
+    parser.add_argument('--popsize', type=int, default=64, help='population size of the algorithm')
+    parser.add_argument('--radius_init', type=float, default=2.25, help='initial radius of the algorithm')
+    parser.add_argument('--center-learning-rate', type=float, default=0.2, help='learning rate of the center of the algorithm')
+    parser.add_argument('--stdev-learning-rate', type=float, default=0.1, help='learning rate of the stdev of the algorithm')
+    parser.add_argument('-i', '--interval', type=int, default=16, help='interval of logging, no log if 0')
     args = parser.parse_args()
 
     problem = evotorch.neuroevolution.NEProblem(
@@ -26,14 +31,14 @@ if __name__ == '__main__':
 
     searcher = evotorch.algorithms.PGPE(
         problem,
-        popsize=64,
-        radius_init=2.25,
-        center_learning_rate=0.2,
-        stdev_learning_rate=0.1
+        popsize=args.popsize,
+        radius_init=args.radius_init,
+        center_learning_rate=args.center_learning_rate,
+        stdev_learning_rate=args.stdev_learning_rate
     )
 
-    interv = 16
-    evotorch.logging.StdOutLogger(searcher, interval=interv)
+    if args.interval != 0:
+        evotorch.logging.StdOutLogger(searcher, interval=args.interval)
     logger = evotorch.logging.PandasLogger(searcher)
 
     searcher.run(args.episodes)

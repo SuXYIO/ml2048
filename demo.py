@@ -5,12 +5,20 @@ demonstrate trained network
 import argparse
 import torch
 import gymnasium as gym
+from time import sleep
 import Game2048Env
+import pygame
 
 device = torch.device(
     "cuda" if torch.cuda.is_available() else
     "cpu"
 )
+
+def wait_for_key():
+    while True:
+        event = pygame.event.wait()
+        if event.type == pygame.KEYDOWN:
+            return
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='evaluate trained model for 2048 game')
@@ -23,6 +31,8 @@ if __name__ == '__main__':
         choices=['human', 'ansi'],
         help='render mode for demo'
     )
+    parser.add_argument('-d', '--delay', type=float, default=0.5, help='delay between steps, ignored if -p is on')
+    parser.add_argument('-p', '--pause', action='store_true', help='pause and wait for keypress after each step')
     args = parser.parse_args()
     model = torch.load(args.path)
     model.eval()
@@ -44,3 +54,7 @@ if __name__ == '__main__':
         ).unsqueeze(0)
         if args.render_mode == 'ansi':
             print(env.render())
+        if args.render_mode == 'human' and args.pause:
+            wait_for_key()
+        else:
+            sleep(args.delay)

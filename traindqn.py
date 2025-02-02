@@ -29,11 +29,6 @@ device = torch.device(
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
-net = torch.load(args.template_path)
-policy_net = net().to(device)
-target_net = net().to(device)
-target_net.load_state_dict(policy_net.state_dict())
-
 steps_done = 0
 episode_rewards = []
 
@@ -68,26 +63,27 @@ def select_action(state):
     else:
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
 
-def plot_result():
+def plot_result(show_result=False):
     '''plot the training result'''
-    plt.figure(figsize=(6, 6))
+    plt.figure(1)
+    if show_result:
+        plt.clf()
 
     # Reward
     rewards_t = torch.tensor(episode_rewards, dtype=torch.float)
-    plt.title(f'{args.save_path}, {num_episodes} episodes')
+
+    if show_result:
+        plt.title(f'{args.save_path}, {num_episodes} episodes')
+    else:
+        plt.clf()
+        plt.title('Training...')
     plt.xlabel('episode')
     plt.ylabel('reward')
-    plt.plot(rewards_t.numpy(), label='Total Reward', color='blue')
-
-    # Take 100 episode averages and plot them too
-    if len(rewards_t) >= 100:
-        means = rewards_t.unfold(0, 100, 1).mean(1).view(-1)
-        means = torch.cat((torch.zeros(99), means))
-        plt.plot(means.numpy(), label='100 Episode Average', color='red')
-
+    plt.plot(rewards_t.numpy(), label='Total Reward')
     plt.legend()
     plt.grid()
-    plt.show()
+
+    plt.pause(0.001)
 
 def optimize_model():
     '''optimize the model'''
@@ -145,10 +141,12 @@ if __name__ == '__main__':
     parser.add_argument('--gamma', type=float, default=0.99, help='discount factor')
     parser.add_argument('--eps-start', type=float, default=0.9, help='epsilon start value')
     parser.add_argument('--eps-end', type=float, default=0.05, help='epsilon end value')
-    parser.add_argument('--eps-decay', type=float, default=0.005, help='epsilon decay rate')
+    parser.add_argument('--eps-decay', type=float, default=0.5, help='epsilon decay rate')
     parser.add_argument('--tau', type=float, default=1e-4, help='target network update rate')
-    parser.add_argument('--lr', type=float, default=10000, help='learning rate')
+    parser.add_argument('--lr', type=float, default=1, help='learning rate')
     parser.add_argument('--replay-memory-size', type=int, help='capacity of replay memory')
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode, show result when training')
+    parser.add_argument('-i', '--interval', type=int, default=16, help='interval to logging, no log if 0')
     args = parser.parse_args()
 
     # BATCH_SIZE is the number of transitions sampled from the replay buffer
@@ -166,23 +164,28 @@ if __name__ == '__main__':
     TAU = args.tau
     LR = args.lr
     REPLAY_MEMORY_SIZE = args.replay_memory_size
+    LOG_INTERV = args.interval
+
+    net = torch.load(args.template_path)
+    policy_net = net().to(device)
+    target_net = net().to(device)
+    target_net.load_state_dict(policy_net.state_dict())
 
     optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
     memory = ReplayMemory(REPLAY_MEMORY_SIZE)
 
-    LOG_INTERV = 16
 
     num_episodes = args.episodes
     for i_episode in range(num_episodes):
-        estate, info = env.reset()
-        estate = torch.tensor(
-            estate.flatten(),
+        state, info = env.reset()
+        state = torch.tensor(
+            state.flatten(),
             dtype=torch.float32,
             device=device
         ).unsqueeze(0)
         total_reward = 0
         for t in count():
-            action = select_action(estate)
+            action = select_action(state)
             observation, reward, terminated, truncated, _ = env.step(action.item())
             total_reward += reward
             reward = torch.tensor([reward], device=device)
@@ -196,26 +199,28 @@ if __name__ == '__main__':
                     device=device
                 ).unsqueeze(0)
 
-            memory.push(estate, action, next_state, reward)
+            memory.push(state, action, next_state, reward)
             state = next_state
             optimize_model()
 
-            # Soft update of the target network's weights
-            with torch.no_grad():
-                for key in target_net.state_dict():
-                    target_net.state_dict()[key] = \
-                        target_net.state_dict()[key] \
-                        * (1 - TAU) + policy_net.state_dict()[key] \
-                        * TAU
+            target_net_state_dict = target_net.state_dict()
+            policy_net_state_dict = policy_net.state_dict()
+            for key in policy_net_state_dict:
+                target_net_state_dict[key] = \
+                    policy_net_state_dict[key]*TAU + \
+                    target_net_state_dict[key]*(1-TAU)
+            target_net.load_state_dict(target_net_state_dict)
 
             if terminated or truncated:
                 episode_rewards.append(total_reward)
-                if i_episode % LOG_INTERV == 0 and i_episode != 0:
-                    print(f"Episode {i_episode + 1} finished, total reward: {total_reward}")
+                if args.verbose:
+                    plot_result()
+                    if (i_episode + 1) % LOG_INTERV == 0 and i_episode != 0 and LOG_INTERV != 0:
+                        print(f"Episode {i_episode + 1} finished, total reward: {total_reward}")
                 break
 
     print('Complete')
-    plot_result()
+    plot_result(show_result=True)
     plt.ioff()
     plt.show()
 

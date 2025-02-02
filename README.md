@@ -67,8 +67,6 @@ And a package
 
 ## Todo
 
-- [ ] Add more **arguments**
-- [ ] Add **dynamic plots** for training
 - [ ] Find better **hyperparameters**
 - [ ] Remove the redundant **template** stuff
 

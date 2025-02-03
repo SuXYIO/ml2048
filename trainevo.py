@@ -26,7 +26,9 @@ if __name__ == '__main__':
     problem = evotorch.neuroevolution.NEProblem(
         "max",
         network=torch.load(args.template_path),
-        network_eval_func=evaluate_model
+        network_eval_func=evaluate_model,
+        num_actors='max',
+        num_gpus_per_actor = 'max'
     )
 
     searcher = evotorch.algorithms.PGPE(
@@ -50,5 +52,5 @@ if __name__ == '__main__':
     plt.grid()
     plt.show()
 
-    trained_network = problem.parameterize_net(searcher.status["center"])
+    trained_network = problem.parameterize_net(searcher.status["best"])
     torch.save(trained_network, args.save_path)

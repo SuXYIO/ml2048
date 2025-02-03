@@ -172,11 +172,6 @@ class Game2048Env(gym.Env):
         canvas.fill((255, 255, 255))
         pix_square_size = self.window_size / self.size
 
-        # Draw grid
-        for x in range(self.size + 1):
-            pygame.draw.line(canvas, (0, 0, 0), (0, pix_square_size * x), (self.window_size, pix_square_size * x), width=3)
-            pygame.draw.line(canvas, (0, 0, 0), (pix_square_size * x, 0), (pix_square_size * x, self.window_size), width=3)
-
         # Render numbers in the grid
         cell_size = self.window_size / self.size
         font = pygame.font.Font(None, 48)
@@ -196,6 +191,11 @@ class Game2048Env(gym.Env):
                 pygame.draw.rect(canvas, tile_color, (col * cell_size, row * cell_size, cell_size, cell_size))
 
                 canvas.blit(text_surface, text_rect)
+
+        # Draw grid
+        for x in range(self.size + 1):
+            pygame.draw.line(canvas, (0, 0, 0), (0, pix_square_size * x), (self.window_size, pix_square_size * x), width=3)
+            pygame.draw.line(canvas, (0, 0, 0), (pix_square_size * x, 0), (pix_square_size * x, self.window_size), width=3)
 
         # Blit the canvas to the window
         self.window.blit(canvas, (0, 0))

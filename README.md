@@ -41,39 +41,38 @@ Well, all the files are built with `argparse`, so you can check **detailed usage
 
 The project consists of three main files
 
-| file | desc |
-| ---- | ---- |
-| `network.py` | neural network **definitions**, and template **export** |
-| `traindqn.py` | use DQN to **train** |
-| `trainevo.py` | use evolutionary algorithm to **train** |
-| `evalmodel.py` | **evaluate** trained model |
-| `demo.py` | **see** the trained model work |
+| file           | desc                                                    |
+| -------------- | ------------------------------------------------------- |
+| `network.py`   | neural network **definitions**, and template **export** |
+| `traindqn.py`  | use DQN to **train**                                    |
+| `trainevo.py`  | use evolutionary algorithm to **train**                 |
+| `evalmodel.py` | **evaluate** trained model                              |
+| `demo.py`      | **see** the trained model work                          |
 
 And a package
 
-| package | desc |
-| ------- | ---- |
+| package       | desc                        |
+| ------------- | --------------------------- |
 | `Game2048Env` | gymnasium env for game 2048 |
 
 ## Dependencies
 
-| name | note |
-| ---- | ---- |
-| `torch` | / |
-| `matplotlib` | / |
-| `numpy` | / |
-| `gymnasium` | / |
-| `evotorch` | only necessary for `trainevo.py` |
+| name         | note                             |
+| ------------ | -------------------------------- |
+| `torch`      | /                                |
+| `matplotlib` | /                                |
+| `numpy`      | /                                |
+| `gymnasium`  | /                                |
+| `evotorch`   | only necessary for `trainevo.py` |
 
 ## Todo
 
 - [ ] Find better **hyperparameters**
 - [ ] Remove the redundant **template** stuff
 
-Open and **glad** for *PR*s.  
+Open and **glad** for *PR*s.
 
 ## Notes
 
 This is just a little experiment, so im only using a `main` branch, at least until i get this to work as a big project, which is unlikely.  
-That means this repo is **really unstable**, so better *fork* it if you wanna use it yourself.  
-
+That means this repo is **really unstable**, so better _fork_ it if you wanna use it yourself.

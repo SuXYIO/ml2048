@@ -5,16 +5,16 @@ import pygame
 
 
 class Game2048Env(gym.Env):
-    metadata = {
-        'render_modes': [
-            'ansi',
-            'human',
-            'rgb_array'
-        ],
-        'render_fps': 4
-    }
+    metadata = {"render_modes": ["ansi", "human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, size:int=4, max_score:int=2048, rate_2:float=0.9, window_size:int=512):
+    def __init__(
+        self,
+        render_mode=None,
+        size: int = 4,
+        max_score: int = 2048,
+        rate_2: float = 0.9,
+        window_size: int = 512,
+    ):
         self.size = size
 
         self._board = np.zeros([size, size], dtype=np.int32)
@@ -31,7 +31,9 @@ class Game2048Env(gym.Env):
         self.window = None
         self.clock = None
 
-        self.observation_space = gym.spaces.Box(low=0, high=max_score, shape=(size, size), dtype=np.int32)
+        self.observation_space = gym.spaces.Box(
+            low=0, high=max_score, shape=(size, size), dtype=np.int32
+        )
 
         self.action_space = gym.spaces.Discrete(4)
 
@@ -43,30 +45,35 @@ class Game2048Env(gym.Env):
     def _get_info(self):
         return {}
 
-    def reset(self, seed:Optional[int]=None, options:Optional[dict]=None):
+    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
 
-        self._board = np.zeros((self.size, self.size), dtype=np.int32)
+        if options != None:
+            if hasattr(options, "board"):
+                self._board = options.board
+        else:
+            self._board = np.zeros((self.size, self.size), dtype=np.int32)
+
         self._score = 0
         self.__end = False
 
         self._add_rand_tile()
         self._add_rand_tile()
 
-        if self.render_mode == 'ansi':
+        if self.render_mode == "ansi":
             self._render_ansi()
-        elif self.render_mode == 'human':
+        elif self.render_mode == "human":
             self._render_frame()
 
         return self._get_obs(), self._get_info()
 
     @property
     def end(self):
-        '''
+        """
         0: continue
         1: lose
         2: win
-        '''
+        """
         if np.max(self._board) >= self._max_score:
             return 2
         elif self.__end:
@@ -78,18 +85,20 @@ class Game2048Env(gym.Env):
         where_empty = list(zip(*np.where(self._board == 0)))
         if where_empty:
             selected = self.np_random.choice(where_empty)
-            self._board[tuple(selected)] = self.np_random.choice([2, 4], p=[self.__rate_2, 1 - self.__rate_2])
+            self._board[tuple(selected)] = self.np_random.choice(
+                [2, 4], p=[self.__rate_2, 1 - self.__rate_2]
+            )
             self.__end = False
         else:
             self.__end = True
 
     def step(self, action):
-        '''
+        """
         0 left
         1 down
         2 right
         3 up
-        '''
+        """
         previous_board = self._board.copy()
 
         merge_score = 0
@@ -111,8 +120,8 @@ class Game2048Env(gym.Env):
                     i += 1
             core += [0] * (len(board_to_left[row]) - len(core))
 
-            board_to_left[row, :len(core)] = core
-            board_to_left[row, len(core):] = 0
+            board_to_left[row, : len(core)] = core
+            board_to_left[row, len(core) :] = 0
         # rotation to the original
         self._board = np.rot90(board_to_left, action)
         self._add_rand_tile()
@@ -135,28 +144,28 @@ class Game2048Env(gym.Env):
         observation = self._get_obs()
         info = self._get_info()
 
-        if self.render_mode == 'ansi':
+        if self.render_mode == "ansi":
             self._render_ansi()
-        elif self.render_mode == 'human':
+        elif self.render_mode == "human":
             self._render_frame()
 
         return observation, reward, terminated, truncated, info
 
     def render(self):
-        if self.render_mode == 'rgb_array':
+        if self.render_mode == "rgb_array":
             return self._render_frame()
-        elif self.render_mode == 'ansi':
+        elif self.render_mode == "ansi":
             return self._render_ansi()
 
     def _render_ansi(self):
-        s = ''
-        s += f'score: {self._score}\n'
+        s = ""
+        s += f"score: {self._score}\n"
         for row in self._board:
-            s += ('\t' + '{:8d}' * self.size + '\n').format(*map(int, row))
+            s += ("\t" + "{:8d}" * self.size + "\n").format(*map(int, row))
         return s
 
     def _render_frame(self):
-        if self.render_mode != 'human':
+        if self.render_mode != "human":
             return
 
         if self.window == None:
@@ -188,30 +197,46 @@ class Game2048Env(gym.Env):
 
                 # tile
                 tile_color = self._get_color(number)
-                pygame.draw.rect(canvas, tile_color, (col * cell_size, row * cell_size, cell_size, cell_size))
+                pygame.draw.rect(
+                    canvas,
+                    tile_color,
+                    (col * cell_size, row * cell_size, cell_size, cell_size),
+                )
 
                 canvas.blit(text_surface, text_rect)
 
         # Draw grid
         for x in range(self.size + 1):
-            pygame.draw.line(canvas, (0, 0, 0), (0, pix_square_size * x), (self.window_size, pix_square_size * x), width=3)
-            pygame.draw.line(canvas, (0, 0, 0), (pix_square_size * x, 0), (pix_square_size * x, self.window_size), width=3)
+            pygame.draw.line(
+                canvas,
+                (0, 0, 0),
+                (0, pix_square_size * x),
+                (self.window_size, pix_square_size * x),
+                width=3,
+            )
+            pygame.draw.line(
+                canvas,
+                (0, 0, 0),
+                (pix_square_size * x, 0),
+                (pix_square_size * x, self.window_size),
+                width=3,
+            )
 
         # Blit the canvas to the window
         self.window.blit(canvas, (0, 0))
 
-        if self.render_mode == 'human':
+        if self.render_mode == "human":
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
 
-            self.clock.tick(self.metadata['render_fps'])
-        elif self.render_mode == 'rgb_array':
+            self.clock.tick(self.metadata["render_fps"])
+        elif self.render_mode == "rgb_array":
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
             )
 
-    def _get_color(self, number:int):
+    def _get_color(self, number: int):
         tile_colors = {
             0: "#CDC1B4",
             2: "#EEE4DA",
@@ -224,7 +249,7 @@ class Game2048Env(gym.Env):
             256: "#EDCC61",
             512: "#EDC850",
             1024: "#EDC53F",
-            2048: "#EDC22E"
+            2048: "#EDC22E",
         }
         return tile_colors.get(number, "#EDC22E")
 

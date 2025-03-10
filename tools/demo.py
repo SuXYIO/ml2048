@@ -1,16 +1,14 @@
 """
-demonstrate trained network
+demonstrate agent
 -h for help
 """
 
 import argparse
-import torch
 import gymnasium as gym
 from time import sleep
 import Game2048Env
 import pygame
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from agents.greedy import *
 
 
 def wait_for_key():
@@ -21,8 +19,8 @@ def wait_for_key():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="evaluate trained model for 2048 game")
-    parser.add_argument("path", type=str, help="path to trained model")
+    parser = argparse.ArgumentParser(description="demonstrate agent")
+    parser.add_argument("agent", type=str, help="agent class name")
     parser.add_argument(
         "-r",
         "--render-mode",
@@ -45,24 +43,17 @@ if __name__ == "__main__":
         help="pause and wait for keypress after each step",
     )
     args = parser.parse_args()
-    model = torch.load(args.path)
-    model.eval()
 
     env = gym.make("Game2048Env/Game2048-v0", render_mode=args.render_mode)
-    state, _ = env.reset()
-    state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(
-        0
-    )
+    agent = eval(args.agent)()
+    observation, _ = env.reset()
+    reward, terminated, truncated, info = 0, False, False, None
 
     while True:
-        with torch.no_grad():
-            action = model(state).max(1).indices.view(1, 1)
-        observation, reward, terminated, truncated, _ = env.step(action.item())
+        action = agent.strat(observation, reward, terminated, truncated, info)
+        observation, reward, terminated, truncated, info = env.step(action)
         if terminated or truncated:
             break
-        state = torch.tensor(
-            observation.flatten(), dtype=torch.float32, device=device
-        ).unsqueeze(0)
         if args.render_mode == "ansi":
             print(env.render())
         if args.render_mode == "human" and args.pause:

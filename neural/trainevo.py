@@ -6,7 +6,6 @@ use evolutionary algorithm to train
 import argparse
 import torch
 import evotorch
-import gymnasium
 import Game2048Env
 from evalmodel import evaluate_model
 import matplotlib.pyplot as plt

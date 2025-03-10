@@ -1,6 +1,6 @@
 # Network saves & templates
-saves/*
-templates/*
+neural/saves/*
+neural/templates/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

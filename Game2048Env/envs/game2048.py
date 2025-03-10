@@ -49,7 +49,7 @@ class Game2048Env(gym.Env):
         super().reset(seed=seed)
 
         if options != None:
-            self._board = options.get("board")
+            self._board = np.copy(options.get("board"))
         else:
             self._board = np.zeros((self.size, self.size), dtype=np.int32)
 

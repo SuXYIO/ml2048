@@ -12,7 +12,7 @@ class AgentGreedy(Agent):
         if stratagy is None:
             self.stratagy = {
                 "vaction_episodes": 2,
-                "vaction_steps": 2,
+                "vaction_steps": 1,
             }
         else:
             self.stratagy = stratagy

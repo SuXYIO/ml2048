@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="evaluate agent")
     parser.add_argument("agent", type=str, help="agent class name")
     parser.add_argument(
-        "-e", "--episodes", type=int, default=64, help="number of episodes to eval"
+        "-e", "--episodes", type=int, default=32, help="number of episodes to eval"
     )
     args = parser.parse_args()
 
